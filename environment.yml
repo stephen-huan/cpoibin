@@ -1,0 +1,14 @@
+name: venv
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python>=3.10.0
+  - cython>=0.29.28
+  - pygments>=2.11.2
+  - pytest>=7.1.2
+  - numpy>=1.21.2
+  - scipy>=1.7.3
+  - conda-forge::fftw>=3.3.10
+  - conda-forge::llvm-openmp>=14.0.3
+  - mkl-devel>=2021.4.0

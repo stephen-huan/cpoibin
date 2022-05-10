@@ -35,7 +35,7 @@ References:
 
 import numpy as np
 import pytest
-from poibin import PoiBin
+from .poibin import PoiBin
 from scipy.stats import binom
 
 
@@ -90,8 +90,9 @@ def test_pmf_accuracy():
     Compare the results with the accuracy check proposed in [Hong2013]_,
     equation (15).
     """
-    [p1, p2, p3] = np.around(np.random.random_sample(size=3), decimals=2)
-    [n1, n2, n3] = np.random.random_integers(1, 10, size=3)
+    rng = np.random.default_rng(1)
+    [p1, p2, p3] = np.around(rng.random(size=3), decimals=2)
+    [n1, n2, n3] = rng.integers(1, 10, size=3)
     nn = n1 + n2 + n3
     l1 = [p1 for i in range(n1)]
     l2 = [p2 for i in range(n2)]
@@ -100,7 +101,7 @@ def test_pmf_accuracy():
     b1 = binom(n=n1, p=p1)
     b2 = binom(n=n2, p=p2)
     b3 = binom(n=n3, p=p3)
-    k = np.random.randint(0, nn + 1)
+    k = rng.integers(0, nn + 1)
     chi_bn = 0
     for j in range(0, k+1):
         for i in range(0, j+1):
@@ -148,14 +149,14 @@ def test_cdf_accuracy():
     assert np.all(np.abs(pb.cdf([0, 2]) - np.array([0.81, 1.])) < 1e-10)
     p = [0.5, 1.0]
     pb = PoiBin(p)
-    assert np.all(np.abs(pb.cdf([1, 2]) == np.array([0.5, 1.])) < 1e-10)
+    assert np.all(np.abs(pb.cdf([1, 2]) - np.array([0.5, 1.])) < 1e-10)
     p = [0.1, 0.5]
     pb = PoiBin(p)
-    assert np.all(np.abs(pb.cdf([0, 1, 2]) == np.array([0.45, 0.95, 1.])) <
+    assert np.all(np.abs(pb.cdf([0, 1, 2]) - np.array([0.45, 0.95, 1.])) <
                   1e-10)
     p = [0.1, 0.5, 0.7]
     pb = PoiBin(p)
-    assert np.all(np.abs(pb.cdf([0, 1, 2]) == np.array([0.135, 0.6, 0.965])) <
+    assert np.all(np.abs(pb.cdf([0, 1, 2]) - np.array([0.135, 0.6, 0.965])) <
                   1e-10)
 
 # PoiBin.pval ------------------------------------------------------------------
@@ -214,42 +215,32 @@ def test_get_pmf_xi():
 # PoiBin.check_rv_input --------------------------------------------------------
 
 def test_check_rv_input():
-    """Test tat inputs are positive integers."""
+    """Test that inputs are positive integers."""
     p = [1, 1]
     pb = PoiBin(p)
     assert pb.check_rv_input([1, 2])
     assert pb.check_rv_input(2)
 
     with pytest.raises(AssertionError,
-                       message="Input value cannot be negative."):
+                       match="Input value cannot be negative."):
         pb.check_rv_input(-1)
     with pytest.raises(AssertionError,
-                       message="Input value must be an integer."):
+                       match="Input value must be an integer."):
         pb.check_rv_input(1.7)
-
-# PoiBin.check_xi_are_real -----------------------------------------------------
-
-def test_check_xi_are_real():
-    """Test the check that the ``xi`` values are real."""
-    pb = PoiBin([0])
-    xi = np.array([1 + 0j, 1.8 + 0j], dtype=complex)
-    assert pb.check_xi_are_real(xi)
-    xi = np.array([1 + 99j, 1.8 + 0j], dtype=complex)
-    assert not pb.check_xi_are_real(xi)
 
 # PoiBin.check_input_prob ------------------------------------------------------
 
 def test_check_input_prob():
     """Test the check that input probabilities are between 0 and 1."""
     with pytest.raises(ValueError,
-                       message="Input must be an one-dimensional array or a"\
+                       match="Input must be an one-dimensional array or a "
                                 + "list."):
         pb = PoiBin([[1, 1], [1, 2]])
     with pytest.raises(ValueError,
-                       message="Input probabilities have to be non negative."):
+                       match="Input probabilities have to be non negative."):
         pb = PoiBin([1, -1])
     with pytest.raises(ValueError,
-                       message="Input probabilities have to be smaller"\
+                       match="Input probabilities have to be smaller "
                                + "than 1."):
         pb = PoiBin([1, 2])
 
