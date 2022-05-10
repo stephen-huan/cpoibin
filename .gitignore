@@ -1,2 +1,7 @@
 # conda virtual environment
 venv
+
+# cython build artifacts
+*.c
+*.html
+
